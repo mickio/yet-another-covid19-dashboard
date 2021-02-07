@@ -27,7 +27,6 @@ export default {
     },
     async created() {
         this.landkreise = await this.$root.$loader(this.urls.RKI_snapshot_URL).get()
-        console.log(this.landkreise)
     }
 }
 </script>

@@ -14,10 +14,10 @@
         </div>
         <div class="tile">
           <div class="tile is-parent">
-            <Map class="tile is-child"/>
+            <Map ref="map" class="tile is-child" @mouseover="highlightDot" @mouseout="downplayDot" @click="selectRegion" />
           </div>
           <div class="tile is-parent">
-            <Scatter class="tile is-child"/>
+            <Scatter ref="scatter" class="tile is-child" @mouseover="highlightMap" @mouseout="downplayMap" @click="selectRegion" />
           </div>
         </div>
       </div>
@@ -31,7 +31,6 @@ import BarLine from '@/components/BarLine'
 import Map from '@/components/Map'
 import Scatter from '@/components/Scatter'
 export default {
-  name: 'HelloWorld',
   components: {
     Table,
     BarLine,
@@ -41,6 +40,37 @@ export default {
   props: {
     msg: String
   },
+  methods: {
+    highlightDot(option) {
+      let index = option.dataIndex
+      this.$refs.scatter.dispatchAction({type: "highlight", dataIndex: index})
+    },
+    downplayDot(option) {
+      let index = option.dataIndex
+      this.$refs.scatter.dispatchAction({type: "downplay", dataIndex: index})
+    },
+    highlightMap(option) {
+      let index = option.dataIndex
+      this.$refs.map.dispatchAction({type: "highlight", dataIndex: index})
+    },
+    downplayMap(option) {
+      let index = option.dataIndex
+      this.$refs.map.dispatchAction({type: "downplay", dataIndex: index})
+    },
+    selectRegion(option){
+      console.log(`Ausgewählt: ${option.data.county?option.data.county:option.data[3].county}`)
+      this.$store.commit('updateRegion',{
+        type: 'county',
+        name: option.data.county?option.data.county:option.data[3].county
+      })
+    }
+  },
+  data() {
+    return {
+      action: null
+    }
+  },
+  created(){console.log('Halloo Welt!')}
 }
 </script>
 

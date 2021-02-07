@@ -9,9 +9,10 @@ export default new Vuex.Store({
     name: 'Bundesgebiet',
   },
   mutations: {
-    updateRegion (state, type, name) {
-      state.type = type
-      state.name = name
+    updateRegion (state, obj) {
+      state.type = obj.type
+      state.name = obj.name
+      console.log(`Committed: ${obj.type} ${obj.name} `)
     }
   },
   actions: {

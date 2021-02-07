@@ -4,6 +4,9 @@
             <chart
             :options="options"
             autoresize
+            @click="option => this.$emit('click',option)"
+            @mouseover="option => this.$emit('mouseover',option)"
+            @mouseout="option => this.$emit('mouseout',option)"
             ref="chart" />
         </figure>
     </div>
@@ -28,16 +31,15 @@ ECharts.registerMap('worldmap',country_regions)
 
 export default {
     components: {chart: ECharts},
-    props: ['options'],
+    props: ['options', 'action'],
     methods: {
         dispatchAction(option) {
             this.$refs.chart.dispatchAction(option)
-        }
+        },
     },
-    computed: {
-        action() {
-            this.dispatchAction(this.$store.action)
-            return this.$store.action
+    watch: {
+        action(newAction) {
+            this.dispatchAction(newAction)
         }
     },
  }
