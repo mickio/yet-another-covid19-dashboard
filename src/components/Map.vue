@@ -28,6 +28,9 @@ export default {
 //    }},
     methods: {
         dispatchAction(option) {
+            if(option.name) {
+                option.dataIndex = this.options.series.data.indexOf(el => el[3].county==option.name)
+            }
             this.$refs.map.dispatchAction(option)
         },
     },

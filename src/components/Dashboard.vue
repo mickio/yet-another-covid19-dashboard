@@ -3,7 +3,7 @@
     <div class="tile is-anchestor">
       <div class="tile is-2">
         <div class="tile is-parent">
-          <Table class="tile is-child"/>
+          <Table class="tile is-child" @click="selectRegion" />
         </div>
       </div>
       <div class="tile is-10 is-vertical">
@@ -42,26 +42,40 @@ export default {
   },
   methods: {
     highlightDot(option) {
-      let index = option.dataIndex
-      this.$refs.scatter.dispatchAction({type: "highlight", dataIndex: index})
+      if(option.dataIndex) {
+        this.$refs.scatter.dispatchAction({type: "highlight", dataIndex: option.dataIndex})
+      } else {
+        this.$refs.scatter.dispatchAction({type: "highlight", name: option})
+      }
     },
     downplayDot(option) {
-      let index = option.dataIndex
-      this.$refs.scatter.dispatchAction({type: "downplay", dataIndex: index})
+      if(option.dataIndex) {
+        this.$refs.scatter.dispatchAction({type: "downplay", dataIndex: option.dataIndex})
+      } else {
+        this.$refs.scatter.dispatchAction({type: "downplay", name: option})
+      }
     },
     highlightMap(option) {
-      let index = option.dataIndex
-      this.$refs.map.dispatchAction({type: "highlight", dataIndex: index})
+      if(option.dataIndex) {
+        this.$refs.map.dispatchAction({type: "highlight", dataIndex: option.dataIndex})
+      } else {
+        this.$refs.map.dispatchAction({type: "highlight", name: option})
+      }
     },
     downplayMap(option) {
-      let index = option.dataIndex
-      this.$refs.map.dispatchAction({type: "downplay", dataIndex: index})
+      if(option.dataIndex) {
+        this.$refs.map.dispatchAction({type: "downplay", dataIndex: option.dataIndex})
+      } else {
+        this.$refs.map.dispatchAction({type: "downplay", name: option})
+      }
     },
     selectRegion(option){
-      console.log(`Ausgewählt: ${option.data.county?option.data.county:option.data[3].county}`)
+      let name = option.county?option.county:option.data.county?option.data.county:option.data[3].county
+      this.highlightDot(name)
+      this.highlightMap(name)
       this.$store.commit('updateRegion',{
         type: 'county',
-        name: option.data.county?option.data.county:option.data[3].county
+        name: name
       })
     }
   },
@@ -70,7 +84,6 @@ export default {
       action: null
     }
   },
-  created(){console.log('Halloo Welt!')}
 }
 </script>
 
