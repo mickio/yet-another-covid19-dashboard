@@ -71,6 +71,11 @@ export default {
     },
     selectRegion(option){
       let name = option.county?option.county:option.data.county?option.data.county:option.data[3].county
+      if(this.currentIndex) {
+        this.downplayDot(this.currentIndex)
+        this.downplayMap(this.currentIndex)
+      }
+      this.currentIndex = name
       this.highlightDot(name)
       this.highlightMap(name)
       this.$store.commit('updateRegion',{
@@ -81,7 +86,7 @@ export default {
   },
   data() {
     return {
-      action: null
+      currentIndex: null
     }
   },
 }

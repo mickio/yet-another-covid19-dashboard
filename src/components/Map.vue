@@ -20,7 +20,7 @@ export default {
    },
    data() { return {
        options,
-       urls
+       urls,
 
    }},
 //    async computed() { return {
@@ -29,7 +29,7 @@ export default {
     methods: {
         dispatchAction(option) {
             if(option.name) {
-                option.dataIndex = this.options.series.data.indexOf(el => el[3].county==option.name)
+                option.dataIndex = this.options.series.data.findIndex(el => el.county==option.name)
             }
             this.$refs.map.dispatchAction(option)
         },
