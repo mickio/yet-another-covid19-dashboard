@@ -1,4 +1,10 @@
 export default {
+    grid: {
+        left: 50,
+        top: 10,
+        bottom: 20,
+        right: 20
+    },  
     series: {
         type: 'scatter',
         name: 'Dynamik',

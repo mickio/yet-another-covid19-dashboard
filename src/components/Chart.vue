@@ -1,6 +1,6 @@
 <template>
     <div class="card-image">
-        <figure class="image">
+        <figure >
             <chart
             :options="options"
             autoresize
@@ -45,8 +45,11 @@ export default {
  }
 </script>
 <style scoped>
+figure {
+    margin: 0;
+}
 .echarts {
-    height: 33vh;
+    height: 45vh;
     width: 100%;
 }
 </style>

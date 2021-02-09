@@ -1,13 +1,11 @@
 <template>
     <div class="card">
-        <div class="card-content">
-            <chart 
-                :options='options'
-                @click="option => this.$emit('click',option)"
-                @mouseover="option => this.$emit('mouseover',option)"
-                @mouseout="option => this.$emit('mouseout',option)"
-                ref="map" />
-        </div>
+        <chart 
+            :options='options'
+            @click="option => this.$emit('click',option)"
+            @mouseover="option => this.$emit('mouseover',option)"
+            @mouseout="option => this.$emit('mouseout',option)"
+            ref="map" />
     </div>
 </template>
 <script>
@@ -28,8 +26,10 @@ export default {
 //    }},
     methods: {
         dispatchAction(option) {
+            console.log(option)
             if(option.name) {
                 option.dataIndex = this.options.series.data.findIndex(el => el.county==option.name)
+                console.log(option)
             }
             this.$refs.map.dispatchAction(option)
         },
@@ -47,6 +47,23 @@ export default {
             });
         }
         // this.options.series.boundingCoords = [[13.3199829332097, 52.3761399064255],[13.4274566946754, 52.5049411782812]]
+    },
+    computed: {
+        county() {
+            return this.$store.state.name
+        },
+    },
+    watch: {
+        county(name) {
+            const bbox = this.$root.$landkreise.features.find(el => el.properties.county === name).bbox
+            const latLng = [(bbox[0]+bbox[2])/2,(bbox[1]+bbox[3])/2]
+            options.series.center = latLng
+            options.series.zoom = 10
+            setTimeout(() => {
+                console.log('Warte...')
+                this.dispatchAction({type: "highlight", name: name})
+            },500)
+        }
     } 
 }
 </script>

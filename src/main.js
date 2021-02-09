@@ -1,6 +1,13 @@
 import Vue from 'vue'
 import App from './App.vue'
 import store from './store'
+import ECharts from 'vue-echarts'
+
+import landkreise from '@/charts/landkreise.geo.json'
+import country_regions from '@/charts/country_regions.geo.json'
+
+ECharts.registerMap('landkreise',landkreise)
+ECharts.registerMap('worldmap',country_regions)
 
 Vue.config.productionTip = false
 
@@ -68,6 +75,8 @@ Vue.prototype.$loader = (url) => {
   }
   return loaders.find(el => el.url === url).loader
 }
+Vue.prototype.$landkreise = landkreise
+Vue.prototype.$worldmap = country_regions
 
 new Vue({
     store,

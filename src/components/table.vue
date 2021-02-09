@@ -13,13 +13,13 @@
                         <tr class="sort-row">
                             <td> <span class="sort" @click="sortLandkreise('a',$event)"></span></td>
                             <td> <span class="sort" @click="sortLandkreise('b',$event)"></span></td>
-                            <td> <span class="sort" @click="sortLandkreise('c',$event)"></span></td>
+                            <td> <span ref="initial-target" class="sort" @click="sortLandkreise('c',$event)"></span></td>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="lk in filteredData" :key="lk.id">
+                        <tr v-for="lk in filteredData" :key="lk.id" >
                             <!-- <th><button class="button" @click="setSelected(lk,$event)">{{lk.county}}</button></th> -->
-                            <th @click="setSelected(lk,$event)">{{lk.county}}</th>
+                            <th @click="setSelected(lk,$event)" @mouseover="mouseover(lk)" @mouseout="mouseout(lk)" >{{lk.county}}</th>
                             <td class="has-text-right">{{lk.cases7_lk}}</td>
                             <td class="has-text-light has-text-right">{{Math.round(lk.cases7_per_100k)}}</td>
                         </tr>
@@ -81,6 +81,12 @@ export default {
             this.activeTarget = event.target.parentNode
             this.activeTarget.classList.add('is-selected')
             this.$emit('click',opt)
+        },
+        mouseover(opt) {
+            this.$emit('mouseover',opt.county)
+        },
+        mouseout(opt) {
+            this.$emit('mouseout',opt.county)
         }
     },
     computed: {
@@ -102,6 +108,8 @@ export default {
     },
     async created() {
         this.landkreise = await this.$root.$loader(this.urls.RKI_snapshot_URL).get()
+        this.activeSortTarget = this.$refs['initial-target']
+        this.activeSortTarget.classList.add('sorted-desc')
     }
 }
 </script>

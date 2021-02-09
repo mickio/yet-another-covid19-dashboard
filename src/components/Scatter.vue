@@ -1,13 +1,11 @@
 <template>
     <div class="card">
-        <div class="card-content">
-            <chart 
-                ref="scatter"
-                @click="option => this.$emit('click',option)"
-                @mouseover="option => this.$emit('mouseover',option)"
-                @mouseout="option => this.$emit('mouseout',option)"
-                :options='options'/>
-        </div>
+        <chart 
+            ref="scatter"
+            @click="option => this.$emit('click',option)"
+            @mouseover="option => this.$emit('mouseover',option)"
+            @mouseout="option => this.$emit('mouseout',option)"
+            :options='options'/>
     </div>
 </template>
 <script>
@@ -17,14 +15,11 @@ import urls from '../scr/urls.js'
 export default {
     components: {
         Chart
-   },
-   data() { return {
+    },
+    data() { return {
         options,
         urls,
-   }},
-//    async computed() { return {
-//        county: this.$store
-//    }},
+    }},
     methods: {
         dispatchAction(option) {
             if(option.name) {

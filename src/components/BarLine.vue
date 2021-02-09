@@ -1,8 +1,6 @@
 <template>
     <div class="card">
-        <div class="card-content">
-            <chart :options='options'/>
-        </div>
+        <chart :options='options'/>
     </div>
 </template>
 <script>

@@ -3,13 +3,13 @@
     <div class="tile is-anchestor">
       <div class="tile is-3">
         <div class="tile is-parent">
-          <Table class="tile is-child" @click="selectRegion" />
+          <Table class="tile is-child" @click="selectRegion" @mouseover="highlightAll" @mouseout="downplayAll" />
         </div>
       </div>
       <div class="tile is-9 is-vertical">
         <div class="tile">
             <div class="tile is-parent">
-              <BarLine class="tile is-child"/>
+              <BarLine class="tile is-child" />
             </div>
         </div>
         <div class="tile">
@@ -74,6 +74,14 @@ export default {
         this.$refs.map.dispatchAction({type: "downplay", name: option})
       }
     },
+    highlightAll(option){
+      this.highlightMap(option)
+      this.highlightDot(option)
+    },
+    downplayAll(option){
+      this.downplayMap(option)
+      this.downplayDot(option)
+    },
     selectRegion(option){
       let name = option.county?option.county:option.data.county?option.data.county:option.data[3].county
       if(this.currentIndex) {
@@ -81,12 +89,12 @@ export default {
         this.downplayMap(this.currentIndex)
       }
       this.currentIndex = name
-      this.highlightDot(name)
-      this.highlightMap(name)
       this.$store.commit('updateRegion',{
         type: 'county',
         name: name
       })
+      this.highlightDot(name)
+      this.highlightMap(name)
     }
   },
   data() {
