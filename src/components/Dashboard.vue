@@ -1,12 +1,12 @@
 <template>
   <div>
     <div class="tile is-anchestor">
-      <div class="tile is-2">
+      <div class="tile is-3">
         <div class="tile is-parent">
           <Table class="tile is-child" @click="selectRegion" />
         </div>
       </div>
-      <div class="tile is-10 is-vertical">
+      <div class="tile is-9 is-vertical">
         <div class="tile">
             <div class="tile is-parent">
               <BarLine class="tile is-child"/>
@@ -15,6 +15,9 @@
         <div class="tile">
           <div class="tile is-parent">
             <Map ref="map" class="tile is-child" @mouseover="highlightDot" @mouseout="downplayDot" @click="selectRegion" />
+          </div>
+          <div class="tile is-parent">
+            <InfoBox class="tile is-child"/>
           </div>
           <div class="tile is-parent">
             <Scatter ref="scatter" class="tile is-child" @mouseover="highlightMap" @mouseout="downplayMap" @click="selectRegion" />
@@ -30,12 +33,14 @@ import Table from '@/components/table'
 import BarLine from '@/components/BarLine'
 import Map from '@/components/Map'
 import Scatter from '@/components/Scatter'
+import InfoBox from '@/components/InfoBox'
 export default {
   components: {
     Table,
     BarLine,
     Map,
-    Scatter
+    Scatter,
+    InfoBox
   },
   props: {
     msg: String
