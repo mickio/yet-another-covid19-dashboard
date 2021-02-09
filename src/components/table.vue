@@ -1,7 +1,7 @@
 <template>
     <div class="card">
         <div class="card-header">
-            <input class="input is-small" type="text" placeholder="z. B. Neuss"/>
+            <input v-model="term" class="input is-small" type="text" placeholder="z. B. Neuss"/>
         </div>
         <div class="card-content">
             <div class="table-container">
@@ -34,7 +34,8 @@ export default {
             urls,
             landkreise: [],
             activeTarget: null,
-            activeSortTarget: null
+            activeSortTarget: null,
+            term: ''
         };
     },
     methods: {
@@ -47,9 +48,9 @@ export default {
             let sortCriterium
             if(this.activeSortTarget && this.activeSortTarget===event.target) {
                 if(this.activeSortTarget.classList.contains('sorted-asc')) {
-                    this.activeSortTarget.classList.remove('sorted-asc')
+                    this.activeSortTarget.classList.remove('sorted-asc') // highlight Sortierrichtung...
                     this.activeSortTarget.classList.add('sorted-desc')
-                    sortCriterium = (a,b) => - operator[opt](a,b)
+                    sortCriterium = (a,b) => - operator[opt](a,b) // ... und Sortierktiterium setzen
                 }else{
                     this.activeSortTarget.classList.remove('sorted-desc')
                     this.activeSortTarget.classList.add('sorted-asc')
@@ -78,7 +79,12 @@ export default {
     },
     computed: {
         filteredData() {
-            return this.landkreise
+            return this.landkreise.filter((option) => {
+                return option.county && option.county
+                    .toString()
+                    .toLowerCase()
+                    .indexOf(this.term.toLowerCase()) >= 0
+            })
         }
     },
     async created() {
