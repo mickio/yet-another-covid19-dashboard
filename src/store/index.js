@@ -12,7 +12,6 @@ export default new Vuex.Store({
     updateRegion (state, obj) {
       state.type = obj.type
       state.name = obj.name
-      console.log(`Committed: ${obj.type} ${obj.name} `)
     }
   },
   actions: {

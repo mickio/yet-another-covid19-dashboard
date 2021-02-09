@@ -19,7 +19,6 @@ export default {
    }},
    computed: {
         county() {
-            console.log( this.$store.state.type=='county'?this.$store.state.name:null);
             return this.$store.state.name
         },
         thisdata: ()=>{
