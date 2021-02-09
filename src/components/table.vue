@@ -1,7 +1,10 @@
 <template>
     <div class="card">
         <div class="card-header">
-            <input v-model="term" class="input is-small" type="text" placeholder="z. B. Neuss"/>
+            <div class="input-container">
+                <div ref="close-icon" @click="clearInput"></div>
+                <input v-model="term" class="input is-small" type="text" placeholder="z. B. Neuss">
+            </div>
         </div>
         <div class="card-content">
             <div class="table-container">
@@ -39,6 +42,9 @@ export default {
         };
     },
     methods: {
+        clearInput() {
+            this.term=''
+        },
         sortLandkreise(opt,event) {
             const operator = {
                 a: (a,b) => (a.GEN > b.GEN)?1:(a.GEN < b.GEN)?-1:0,
@@ -79,6 +85,13 @@ export default {
     },
     computed: {
         filteredData() {
+            if(this.$refs['close-icon']) {
+                if (this.term) {
+                    this.$refs['close-icon'].classList.add('close-icon')
+                } else {
+                    this.$refs['close-icon'].classList.remove('close-icon')
+                }
+            }
             return this.landkreise.filter((option) => {
                 return option.county && option.county
                     .toString()
@@ -120,6 +133,27 @@ export default {
 }
 .table.is-narrow td, .table.is-narrow th {
     padding: 0.25em;
+}
+/* .input-container {
+    width: 100%;
+} */
+/* .input-container .close-icon {
+  position: absolute
+} */
+.input-container {
+    display: contents;
+}
+.close-icon {
+    right:0;
+    position: absolute;
+    z-index: 10;
+    padding:0.5rem;
+}
+.close-icon::after {
+  content: '✖';
+  cursor: pointer;
+  padding: 0.5rem;
+  color: #757576
 }
 th {
     cursor: pointer;
