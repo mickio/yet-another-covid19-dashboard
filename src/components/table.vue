@@ -5,17 +5,18 @@
         </div>
         <div class="card-content">
             <div class="table-container">
-                <table class="table is-hoverable is-narrow" >
+                <table class="table is-hoverable is-narrow is-fullwidth" >
                     <thead>
                         <tr class="sort-row">
-                            <td> <span class="sort" @click="setSortCriterium('a',$event)"></span></td>
-                            <td> <span class="sort" @click="setSortCriterium('b',$event)"></span></td>
-                            <td> <span class="sort" @click="setSortCriterium('c',$event)"></span></td>
+                            <td> <span class="sort" @click="sortLandkreise('a',$event)"></span></td>
+                            <td> <span class="sort" @click="sortLandkreise('b',$event)"></span></td>
+                            <td> <span class="sort" @click="sortLandkreise('c',$event)"></span></td>
                         </tr>
                     </thead>
                     <tbody>
                         <tr v-for="lk in filteredData" :key="lk.id">
-                            <th><button class="button" @click="onclick(lk,$event)">{{lk.county}}</button></th>
+                            <!-- <th><button class="button" @click="setSelected(lk,$event)">{{lk.county}}</button></th> -->
+                            <th @click="setSelected(lk,$event)">{{lk.county}}</th>
                             <td class="has-text-right">{{lk.cases7_lk}}</td>
                             <td class="has-text-light has-text-right">{{Math.round(lk.cases7_per_100k)}}</td>
                         </tr>
@@ -33,64 +34,44 @@ export default {
             urls,
             landkreise: [],
             activeTarget: null,
-            sortCriterium: null,
             activeSortTarget: null
         };
     },
     methods: {
-        setSortCriterium(opt,event) {
-            let key
+        sortLandkreise(opt,event) {
+            const operator = {
+                a: (a,b) => (a.GEN > b.GEN)?1:(a.GEN < b.GEN)?-1:0,
+                b: (a,b) => a.cases7_lk - b.cases7_lk,
+                c: (a,b) => a.cases7_per_100k - b.cases7_per_100k
+            }
+            let sortCriterium
             if(this.activeSortTarget && this.activeSortTarget===event.target) {
                 if(this.activeSortTarget.classList.contains('sorted-asc')) {
                     this.activeSortTarget.classList.remove('sorted-asc')
                     this.activeSortTarget.classList.add('sorted-desc')
-                    key = `${opt} desc`
+                    sortCriterium = (a,b) => - operator[opt](a,b)
                 }else{
                     this.activeSortTarget.classList.remove('sorted-desc')
                     this.activeSortTarget.classList.add('sorted-asc')
-                    key = `${opt} asc`
+                    sortCriterium = (a,b) => operator[opt](a,b)
                 }
             }else if(this.activeSortTarget ) {
-                    this.activeSortTarget.classList.remove('sorted-asc')
-                    this.activeSortTarget.classList.remove('sorted-desc')
+                    this.activeSortTarget.classList.remove('sorted-asc','sorted-desc')
                     this.activeSortTarget = event.target
                     this.activeSortTarget.classList.add('sorted-asc')
-                    key = `${opt} asc`
+                    sortCriterium = (a,b) => operator[opt](a,b)
             }else{
                     this.activeSortTarget = event.target
                     this.activeSortTarget.classList.add('sorted-asc')
-                    key = `${opt} asc`
+                    sortCriterium = (a,b) => operator[opt](a,b)
             }
-            switch (key) {
-                case 'a asc':
-                    this.sortCriterium = (a,b) => (a.GEN > b.GEN)?1:(a.GEN < b.GEN)?-1:0
-                    break;
-                case 'a desc':
-                    this.sortCriterium = (a,b) => (a.GEN < b.GEN)?1:(a.GEN > b.GEN)?-1:0
-                    break;
-                case 'b asc':
-                    this.sortCriterium = (a,b) => a.cases7_lk - b.cases7_lk
-                    break;
-                case 'b desc':
-                    this.sortCriterium = (a,b) => b.cases7_lk - a.cases7_lk
-                    break;
-                case 'c asc':
-                    this.sortCriterium = (a,b) => a.cases7_per_100k - b.cases7_per_100k
-                    break;
-                case 'c desc':
-                    this.sortCriterium = (a,b) => b.cases7_per_100k - a.cases7_per_100k
-                    break;
-            
-                default:
-                    break;
-            }
-            this.landkreise = this.landkreise.sort((a,b) => this.sortCriterium(a,b))
+            this.landkreise = this.landkreise.sort((a,b) => sortCriterium(a,b))
         },
-        onclick(opt,event) {
+        setSelected(opt,event) {
             if(this.activeTarget) {
                 this.activeTarget.classList.remove('is-selected')
             }
-            this.activeTarget = event.target.parentNode.parentNode
+            this.activeTarget = event.target.parentNode
             this.activeTarget.classList.add('is-selected')
             this.$emit('click',opt)
         }
@@ -134,17 +115,8 @@ export default {
 .table.is-narrow td, .table.is-narrow th {
     padding: 0.25em;
 }
-.button {
-	background-color:transparent;
-	border-color: transparent;
-	border-width: 1px;
-	color: currentColor;
-	cursor: pointer;
-	justify-content: center;
-	padding: 0;
-	text-align: left;
-    font-size: 0.8rem;
-	/* white-space: nowrap; */
+th {
+    cursor: pointer;
 }
 .sort-row {
     height: 1.5rem;
