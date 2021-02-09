@@ -8,6 +8,7 @@
         </div>
         <div class="card-content">
             <div class="table-container">
+                    <p class="has-text-small" >Neu gemeldet | <span class="has-text-light" >Neu pro 100.000 EW</span></p>
                 <table class="table is-hoverable is-narrow is-fullwidth" >
                     <thead>
                         <tr class="sort-row">
@@ -132,7 +133,11 @@ export default {
 .is-small {
     height: 1.5rem;
 }
-
+.has-text-small {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 0.75rem;
+    text-align: center;
+}
 .has-text-light {
     color: hsl(0,2%,70%)
 }

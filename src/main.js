@@ -51,7 +51,6 @@ class GeoJSONPropertiesLoader {
     }
     async get() {
         if(this.isSet) {
-            console.log('Daten bereits vorhanden')
             return Promise.resolve(this.properties)
         }
         this.set()

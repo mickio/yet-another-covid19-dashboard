@@ -1,5 +1,10 @@
 <template>
     <div class="card">
+        <div class="card-header">
+            <div class="card-header-title title">
+                Infektionsgeschehen im {{county}}
+            </div>
+        </div>
         <chart :options='options'/>
     </div>
 </template>
@@ -47,3 +52,10 @@ export default {
     } 
 }
 </script>
+<style scoped>
+.title {
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: bold;
+    line-height: 1rem;
+}
+</style>

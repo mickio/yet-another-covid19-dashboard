@@ -60,7 +60,6 @@ export default {
             options.series.center = latLng
             options.series.zoom = 10
             setTimeout(() => {
-                console.log('Warte...')
                 this.dispatchAction({type: "highlight", name: name})
             },500)
         }
