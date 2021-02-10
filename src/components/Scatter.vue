@@ -41,8 +41,18 @@ export default {
                 el.lastweek = lw
                 this.options.series.data.push([Math.round(el.cases7_per_100k),Math.round(rate),lw,el])
             })
+            console.log(this.options.series.data)
         }
-        // this.options.series.boundingCoords = [[13.3199829332097, 52.3761399064255],[13.4274566946754, 52.5049411782812]]
+    },
+    computed: {
+        county() {
+            return this.$store.state.name
+        },
+    },
+    watch: {
+        county(name) {
+            this.dispatchAction({type: "showTip", name: name})
+        }
     } 
 }
 </script>

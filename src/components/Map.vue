@@ -26,10 +26,8 @@ export default {
 //    }},
     methods: {
         dispatchAction(option) {
-            console.log(option)
             if(option.name) {
                 option.dataIndex = this.options.series.data.findIndex(el => el.county==option.name)
-                console.log(option)
             }
             this.$refs.map.dispatchAction(option)
         },
