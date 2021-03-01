@@ -1,15 +1,10 @@
 <template>
-    <div class="card-image">
-        <figure >
-            <chart
-            :options="options"
-            autoresize
-            @click="option => this.$emit('click',option)"
-            @mouseover="option => this.$emit('mouseover',option)"
-            @mouseout="option => this.$emit('mouseout',option)"
-            ref="chart" />
-        </figure>
-    </div>
+    <chart        
+        :options="options"
+        @click="option => this.$emit('click',option)"
+        @mouseover="option => this.$emit('mouseover',option)"
+        @mouseout="option => this.$emit('mouseout',option)"
+        ref="chart" />
 </template>
 
 <script>
@@ -25,25 +20,42 @@ import 'echarts/lib/component/visualMap'
 
 export default {
     components: {chart: ECharts},
-    props: ['options', 'action'],
+    props: ['options', 'action'], 
     methods: {
         dispatchAction(option) {
             this.$refs.chart.dispatchAction(option)
         },
     },
+    computed: {
+        setting() {return this.$store.state.setting}
+    },
     watch: {
         action(newAction) {
             this.dispatchAction(newAction)
+        },
+        setting() {
+            console.log('updated!')
+            this.$nextTick( () => this.$refs.chart.resize() ) 
+            setTimeout(() => {
+                this.$refs.chart.resize()
+            },1500)
         }
     },
+    mounted() {
+        setTimeout(() => {
+            this.$refs.chart.resize()
+        },1500)
+
+    }
  }
 </script>
 <style scoped>
-figure {
+/* figure, .card-image {
     margin: 0;
-}
+    height: 100%;
+} */
 .echarts {
-    height: 45vh;
+    height: 100%;
     width: 100%;
 }
 </style>

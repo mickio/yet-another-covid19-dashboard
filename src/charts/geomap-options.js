@@ -38,9 +38,8 @@ export default {
       map: 'landkreise',
       tooltip: {
         formatter (val) {
-          return `<b>${val.data.values.GEN}</b><br/>
-          Inzidenz/Woche: ${Math.round(val.data.value)}<br/>
-          Todesfälle/100.000/Woche: ${Math.round(val.data.values.death7_lk*100000/val.data.values.EWZ)} `
+          return `<b>${val.data.values.GEN??val.data.name}</b><br/>
+          Inzidenz/Woche: ${Math.round(val.data.value)}<br/>`
         },
         extraCssText: "text-align:left"
       },

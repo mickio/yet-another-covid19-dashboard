@@ -1,31 +1,19 @@
 <template>
-  <div>
-    <div class="tile is-anchestor">
-      <div class="tile is-3">
-        <div class="tile is-parent">
-          <Table class="tile is-child" @click="selectRegion" @mouseover="highlightAll" @mouseout="downplayAll" />
-        </div>
-      </div>
-      <div class="tile is-9 is-vertical">
-        <div class="tile">
-            <div class="tile is-parent">
-              <BarLine class="tile is-child" />
-            </div>
-        </div>
-        <div class="tile">
-          <div class="tile is-parent">
-            <Map ref="map" class="tile is-child" @mouseover="highlightDot" @mouseout="downplayDot" @click="selectRegion" />
-          </div>
-          <div class="tile is-parent">
-            <InfoBox class="tile is-child"/>
-          </div>
-          <div class="tile is-parent">
-            <Scatter ref="scatter" class="tile is-child" @mouseover="highlightMap" @mouseout="downplayMap" @click="selectRegion" />
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+  <main>
+    <section class="is-fullheight-grid">
+      <Table @mouseover="highlightAll" @mouseout="downplayAll" />
+    </section>
+    <section class="is-upper-row">
+      <InfoBox/>
+      <BarLine/>
+    </section>
+    <section>
+      <Map ref="map" @mouseover="highlightDot" @mouseout="downplayDot"/>
+    </section>
+    <section>
+      <Scatter ref="scatter" @mouseover="highlightMap" @mouseout="downplayMap"/>
+    </section>
+  </main>
 </template>
 
 <script>
@@ -82,20 +70,6 @@ export default {
       this.downplayMap(option)
       this.downplayDot(option)
     },
-    selectRegion(option){
-      let name = option.county?option.county:option.data.county?option.data.county:option.data[3].county
-      if(this.currentIndex) {
-        this.downplayDot(this.currentIndex)
-        this.downplayMap(this.currentIndex)
-      }
-      this.currentIndex = name
-      this.$store.commit('updateRegion',{
-        type: 'county',
-        name: name
-      })
-      this.highlightDot(name)
-      this.highlightMap(name)
-    }
   },
   data() {
     return {
@@ -106,19 +80,51 @@ export default {
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
-h3 {
-  margin: 40px 0 0;
+<style>
+Map, Scatter, BarLine, InfoBox {
+  height: 100%;
+  width: 100%
 }
-ul {
-  list-style-type: none;
-  padding: 0;
+main {
+  background-color: var(--background-color);
+  display: grid;
+  grid-template-columns: min-content 1fr 1fr;
+  grid-template-rows: 250px calc(100vh - 250px - 0.5rem); 
+  /* grid-template-rows: min-content auto;  */
+  grid-gap: var(--gap);
+  height:100vh;
+  box-sizing: border-box;
 }
-li {
-  display: inline-block;
-  margin: 0 10px;
+section {
+  background-color: var(--background-color);
+  clear: both;
+  /* border: 1px dashed blue; */
 }
-a {
-  color: #42b983;
+.is-fullheight-grid{
+  height: 100%;
+  grid-row: 1/3;
+}
+.is-upper-row {
+  grid-column:2/4;
+  display: flex;
+  column-gap: var(--gap);
+  flex-direction:row-reverse;
+}
+@media only screen and (max-width: 800px) {
+  main {
+    display: flex;
+    flex-direction:column;
+  }
+  .is-upper-row {
+    display: flex;
+    flex-direction:column-reverse;
+  }
+  .card {
+    width: 100vw;
+    height: 100vh;
+    border: none;
+    box-shadow: none;
+    /* margin: 0.5rem; */
+  }
 }
 </style>

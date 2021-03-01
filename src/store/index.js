@@ -5,15 +5,13 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
-    type: 'county',
-    name: 'Bundesgebiet',
+    setting: {type: 'county',name: 'Bundesgebiet',dataType: 'daily-values'},
+    resize: false
   },
   mutations: {
     updateRegion (state, obj) {
-      state.type = obj.type
-      state.name = obj.name
-      state.dataIndex = obj.dataIndex??null
-    }
+      state.setting = {type: obj.type,name: obj.name}
+    },
   },
   actions: {
   },

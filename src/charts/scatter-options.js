@@ -18,18 +18,18 @@ export default {
                 borderColor: "hsl(200,100%,10%,0.5)",
                 borderWidth: 1,
                       formatter ({ data }) {
-                   return data[2].Landkreis
+                   return data[2].Landkreis??data[2].country
                 },
                 position: 'top'
             }
         },
         tooltip:{
             formatter ({data}) {
-                return `<b>${data[2].Landkreis}</b><br/>
+                return `<b>${data[2].Landkreis??data[2].country}</b><br/>
                 Inzidenz: ${data[0]}<br/>
                 Veränderung: ${data[1]} %<br/>
-                ${data[1]<0?'Halbierungszeit':'Verdopplungszeit'}: ${Math.abs(Math.round(7/Math.log2(1+data[1]/100)))} Tage<br/>
-                R ~ ${Math.round(100*2**(4/7*Math.log2(1+data[1]/100)))/100} `
+                ${data[1]<0?'Halbierungszeit':'Verdopplungszeit'}: ${data[2].r?Math.abs(Math.round(1/data[2].rate_d_confirmed)) : Math.abs(Math.round(7/Math.log2(1+data[1]/100)))} Tage<br/>
+                R ~ ${data[2].r?Math.round(100*data[2].r)/100 : Math.round(100*2**(4/7*Math.log2(1+data[1]/100)))/100} `
             },
             extraCssText: "text-align:left"
         },
