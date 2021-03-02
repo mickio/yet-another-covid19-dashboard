@@ -19,9 +19,9 @@
                     <tr v-for="lk in filteredData" :key="lk.id" >
                         <!-- <th><button class="button" @click="setSelected(lk,$event)">{{lk.county}}</button></th> -->
                         <th @click="setSelected(lk,$event)" @mouseover="mouseover(lk)" @mouseout="mouseout(lk)" >{{lk.county?lk.county:lk.country}}</th>
-                        <td class="has-text-right">{{lk.cases?lk.cases:lk.confirmed}}</td>
-                        <td class="has-text-right">{{lk.cases7_lk?lk.cases7_lk:lk.d_confirmed_7}}</td>
-                        <td class="has-text-light has-text-right">{{Math.round(lk.cases7_per_100k?lk.cases7_per_100k:(lk.d_confirmed_7 * lk.incidence / lk.confirmed))}}</td>
+                        <td class="has-text-right">{{Intl.NumberFormat().format(lk.cases?lk.cases:lk.confirmed)}}</td>
+                        <td class="has-text-right">{{Intl.NumberFormat().format(lk.cases7_lk?lk.cases7_lk:lk.d_confirmed_7)}}</td>
+                        <td class="has-text-light has-text-right">{{Intl.NumberFormat().format(Math.round(lk.cases7_per_100k?lk.cases7_per_100k:(lk.d_confirmed_7 * lk.incidence / lk.confirmed)))}}</td>
                     </tr>
                 </tbody>
             </table>

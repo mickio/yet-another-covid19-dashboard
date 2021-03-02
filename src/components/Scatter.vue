@@ -10,17 +10,17 @@
 </template>
 <script>
 import Chart from '@/components/Chart'
-import options from '../charts/scatter-options.js'
+import {nationalOptions, internationalOptions} from '../charts/scatter-options.js'
 import endpoints from '../scr/endpoints.js'
 export default {
     components: {
         Chart
     },
     data() { return {
-        options,
+        options: {},
+        nationalOptions,
+        internationalOptions,
         endpoints,
-        data_counties: [],
-        data_countries: null
     }},
     methods: {
         dispatchAction(option) {
@@ -30,26 +30,22 @@ export default {
             this.$refs.scatter.dispatchAction(option)
         },
         select(option) {
-            let setting = this.setting
-            setting.name = option.data[3].county
-            this.$store.commit('updateRegion', setting)
+            this.$store.commit('updateRegion', {name: option.data[3].county})
         }
     },
-   async created() {
+    async created() {
         const [current, lastweek] = await Promise.all([
             this.$root.$loader(this.endpoints.RKI_snapshot_endpoint).get(),
             this.$root.$loader(this.endpoints.RKI_last_week_snapshot_endpoint).get()
         ]);
-        if(this.data_counties==0) {
-            current.forEach(el =>{
-                const lw = lastweek.find(elem => elem.IdLandkreis===el.RS);
-                const rate = (el.cases7_lk-lw.confirmed7)/lw.confirmed7*100;
-                lw.f7=el.cases7_lk/lw.confirmed7
-                el.lastweek = lw
-                this.data_counties.push([Math.round(el.cases7_per_100k),Math.round(rate),lw,el])
-            })
-            this.options.series.data = this.data_counties
-        }
+        current.forEach(el =>{
+            const lw = lastweek.find(elem => elem.IdLandkreis===el.RS);
+            const rate = (el.cases7_lk-lw.confirmed7)/lw.confirmed7*100;
+            lw.f7=el.cases7_lk/lw.confirmed7
+            el.lastweek = lw
+            this.nationalOptions.series.data.push([Math.round(el.cases7_per_100k),Math.round(rate),lw,el])
+        })
+        this.options = this.nationalOptions
     },
     computed: {
         setting() {
@@ -58,20 +54,18 @@ export default {
     },
     watch: {
         async setting(setting) {
-              this.dispatchAction({type: "showTip", name: setting.name})
             if(setting.type == 'county') {
-                this.options.series.data = this.data_counties
+                this.options = this.nationalOptions
             } else {
-                if(!this.data_countries) {
-                    this.data_countries = []
+                if(this.internationalOptions.series.data.length == 0) {
                     const features = await this.$root.$loader(this.endpoints.JHU_snapshot_endpoint).get()
                     features.forEach( properties => {
                         let incidence = Math.round(properties.d_confirmed_7/properties.confirmed * properties.incidence)
                         let delta = Math.round((2**(7*properties.rate_active)-1)*100)
-                        this.data_countries.push([incidence,delta,properties,{county: properties.country}])
+                        this.internationalOptions.series.data.push([incidence,delta,properties,{county: properties.country}])
                     })
                 }
-                this.options.series.data = this.data_countries
+                this.options = this.internationalOptions
             }
         }
     } 

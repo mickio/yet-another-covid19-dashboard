@@ -1,7 +1,7 @@
 <template>
     <div class="card is-full-height">
         <div class="title">
-            Infektionsgeschehen im {{state.name}}
+            Infektionsgeschehen {{state.name}}
         </div>
         <chart ref="chart" :options='options'/>
         <div class="card-footer">
@@ -16,7 +16,7 @@
 </template>
 <script>
 import Chart from '@/components/Chart'
-import options from '../charts/bar-line-options.js'
+import {dailyValuesOptionsCounty, dailyValuesOptionsCountry, cumulativeValuesOptionsCounty, cumulativeValuesOptionsCountry} from '../charts/bar-line-options.js'
 import endpoints from '../scr/endpoints.js'
 import {fetchRKITimeSeries, fetchJHUTimeSeries} from '../scr/helpers.js'
 export default {
@@ -24,8 +24,12 @@ export default {
         Chart
     },
     data() { return {
-        options,
+        dailyValuesOptionsCounty,
+        dailyValuesOptionsCountry,
+        cumulativeValuesOptionsCounty,
+        cumulativeValuesOptionsCountry,
         endpoints,
+        options: {},
         isCumulative: false,
         currentTab: null,
         timeSeries: null,
@@ -43,15 +47,10 @@ export default {
             types.forEach(t=>this.$refs[t].classList.remove('is-active'))
             if(type == 'daily-values'){
                 this.timeSeries = this.state.type==='county' ? this.setTimeSeriesDataCounty : this.setTimeSeriesDataCountry
-                // this.options.yAxis[0].type = "value"
-                this.options.series[0].type = "bar"
-                this.options.series[3].type = "bar"
+                this.options = this.state.type==='county' ? this.dailyValuesOptionsCounty : this.dailyValuesOptionsCountry
             } else {
-                console.log("switch")
                 this.timeSeries = this.state.type==='county' ? this.setTimeSeriesDataCountyCumulative : this.setTimeSeriesDataCountryCumulative
-                // this.options.yAxis[0].type = "log"
-                // this.options.series[0].type = "line"
-                // this.options.series[3].type = "line"
+                this.options = this.state.type==='county' ? this.cumulativeValuesOptionsCounty : this.cumulativeValuesOptionsCountry
             }
             await this.timeSeries(this.state.name)
         },
@@ -73,11 +72,9 @@ export default {
             let endpoint_country = this.endpoints.JHU_history_URL(country)
             const data = await this.$root.$loader(endpoint_country).getComputed(fetchJHUTimeSeries)
             this.options.series[0].data = data.timeSeriesConfirmed
-            this.options.series[1].data = []
-            this.options.series[2].data = data.timeSeriesConfirmedMovingAverage
-            this.options.series[3].data = data.timeSeriesDeaths
-            this.options.series[4].data = []
-            this.options.series[5].data = data.timeSeriesR
+            this.options.series[1].data = data.timeSeriesConfirmedMovingAverage
+            this.options.series[2].data = data.timeSeriesDeaths
+            this.options.series[3].data = data.timeSeriesR
         },
         async setTimeSeriesDataCountyCumulative(county) {
             let endpoint_confirmed = this.endpoints.RKI_time_series_endpoint(county, 'AnzahlFall', 'NeuerFall')
@@ -87,41 +84,37 @@ export default {
                 this.$root.$loader(endpoint_deaths).getComputed( fetchRKITimeSeries )
             ])
             this.options.series[0].data = data_confirmed.cumulativeSeries
-            this.options.series[1].data = []
-            this.options.series[2].data = data_deaths.cumulativeSeries
-            this.options.series[3].data = []
-            this.options.series[4].data = []
-            this.options.series[5].data = []
+            this.options.series[1].data = data_deaths.cumulativeSeries
         },
         async setTimeSeriesDataCountryCumulative(country) {
             let endpoint_country = this.endpoints.JHU_history_URL(country)
             const data = await this.$root.$loader(endpoint_country).getComputed(fetchJHUTimeSeries)
             this.options.series[0].data = data.timeSeriesConfirmedCumulative
-            this.options.series[1].data = []
+            this.options.series[1].data = data.timeSeriesDeathsCumulative
             this.options.series[2].data = data.timeSeriesActiveCumulative
-            this.options.series[3].data = data.timeSeriesDeathsCumulative
-            this.options.series[4].data = []
-            this.options.series[5].data = []
         },
     },
     watch: {
         async state(newState) {
-            console.log(newState)
+            this.setTab('daily-values')
             if (newState.type == 'county') { 
                 this.timeSeries = this.setTimeSeriesDataCounty
+                this.options = this.dailyValuesOptionsCounty
             }else if (newState.type == 'country') { 
                 this.timeSeries = this.setTimeSeriesDataCountry
+                this.options = this.dailyValuesOptionsCountry
             }
             await this.timeSeries(newState.name)
         },
     },
     async created() {
         this.timeSeries = this.setTimeSeriesDataCounty
+        this.options = this.dailyValuesOptionsCounty
         await this.timeSeries('Bundesgebiet')
     },
-    mounted() {
-        console.log(this.$refs.chart.$children[0].$el) //@TODO
-    }
+    // mounted() {
+    //     console.log(this.$refs.chart.$children[0].$el) //@TODO
+    // }
 }
 </script>
 <style>

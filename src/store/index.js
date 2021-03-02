@@ -10,7 +10,7 @@ export default new Vuex.Store({
   },
   mutations: {
     updateRegion (state, obj) {
-      state.setting = {type: obj.type,name: obj.name}
+      state.setting = {...state.setting, ...obj}
     },
   },
   actions: {

@@ -13,6 +13,7 @@ import 'echarts/lib/chart/bar'
 import 'echarts/lib/chart/line'
 import 'echarts/lib/chart/map'
 import 'echarts/lib/chart/scatter'
+import 'echarts/lib/component/title'
 import 'echarts/lib/component/tooltip'
 import 'echarts/lib/component/dataZoom'
 import 'echarts/lib/component/legend'
@@ -44,8 +45,10 @@ export default {
     mounted() {
         setTimeout(() => {
             this.$refs.chart.resize()
-        },1500)
-
+        },5500)
+        setTimeout(() => {
+            this.$refs.chart.resize()
+        },6000)
     }
  }
 </script>

@@ -89,7 +89,7 @@ main {
   background-color: var(--background-color);
   display: grid;
   grid-template-columns: min-content 1fr 1fr;
-  grid-template-rows: 250px calc(100vh - 250px - 0.5rem); 
+  grid-template-rows: 300px calc(100vh - 300px - 0.5rem); 
   /* grid-template-rows: min-content auto;  */
   grid-gap: var(--gap);
   height:100vh;

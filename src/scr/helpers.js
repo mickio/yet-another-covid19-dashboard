@@ -34,7 +34,6 @@ export class GeoJSONPropertiesLoader {
                     json.features.forEach(feature => {
                         this.properties.push(feature.properties);
                 })}else{
-                    console.log('Jetzt wird das json geparst')
                     json.forEach(properties => this.properties.push(properties))
                 }
                 this.isLoading = false
@@ -228,4 +227,89 @@ export async function mapToJHUFormat(features) {
         county: properties.GEN,
         Combined_Key: properties.county
     }})
+}
+export class Option {
+    constructor(options) {
+        this.seriesTemplate = {
+             itemStyle: {
+                emphasis: {
+                    shadowBlur: 20,
+                    shadowColor: 'rgba(120, 36, 50, 0.5)',
+                    shadowOffsetY: 5,
+                    color: '#32fb08'
+                }
+            },  
+            data: []
+        }
+
+        this.options = {
+            series: this.seriesTemplate,
+            ...options
+        }
+    }
+    appendSeries(options){
+        let series = {
+            ...this.seriesTemplate,
+            ...options
+        }
+        if (!Array.isArray(this.options.series)){
+            this.options.series = [this.options.series]
+        }
+        this.options.series.push(series)
+        return this
+    }
+    setSeriesLabel(hue,options,seriesIndex){
+        let emphasis = {
+            show:true,
+            backgroundColor: `hsl(${hue},100%,90%,0.5)`,
+            padding: [4,2,2,2],
+            borderColor: `hsl(${hue},100%,10%,0.5)`,
+            borderWidth: 1,
+            ...options
+        }
+        if(seriesIndex===undefined){
+            this.options.series.label = {emphasis}
+        }else{
+            this.options.series[seriesIndex].label = {emphasis}
+        }
+        return this
+    }
+    setSeriesItemStyle(hsl,options,seriesIndex){
+        let emphasis = {
+            shadowBlur: 20,
+            shadowColor: `hsl(${hsl[0]},20%,10%,0.5)`,
+            shadowOffsetY: 5,
+            color: `hsl(${hsl[0]},${hsl[1]}%,${hsl[2]}%,0.5)`
+        }
+        let itemStyle = {emphasis,...options}
+        if(seriesIndex===undefined){
+            this.options.series.itemStyle = itemStyle
+        }else{
+            this.options.series[seriesIndex].itemStyle = itemStyle
+        }
+        return this
+    }
+    mergeOption(option, options) {
+        this.options[option] = {...this.options[option], ...options}
+        return this
+    }
+    setOption(option, value) {
+        this.options[option] = value
+        return this
+    }
+    setSeriesOption(option, value, seriesIndex) {
+        this.options.series[seriesIndex ?? 0][option] = value
+        return this
+    }
+    mergeSeriesOption(options, seriesIndex) {
+        if(seriesIndex===undefined) {
+            this.options.series = {...this.options.series, ...options}
+        } else {
+            this.options.series[seriesIndex] = {...this.options.series[seriesIndex], ...options}
+        }
+        return this
+    }
+    getOptions(){
+        return this.options
+    }
 }
