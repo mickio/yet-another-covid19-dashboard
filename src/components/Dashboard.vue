@@ -119,12 +119,5 @@ section {
     display: flex;
     flex-direction:column-reverse;
   }
-  .card {
-    width: 100vw;
-    height: 100vh;
-    border: none;
-    box-shadow: none;
-    /* margin: 0.5rem; */
-  }
 }
 </style>

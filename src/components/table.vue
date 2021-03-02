@@ -167,7 +167,7 @@ input {
     background-color: var(--selected-color);
 }
 .table-container {
-    height:calc(100vh - 60px);
+    height:calc(100% - 60px);
     overflow-y: scroll;
     font-size: var(--small-text);
 }
