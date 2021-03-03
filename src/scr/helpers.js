@@ -150,7 +150,6 @@ export async function fetchRKITimeSeries(features) {
             timeSeries[0].push([properties.Meldedatum,properties.GesamtFaelleTag])
             if (currentMeldedatum === properties.Meldedatum) {
                 increment += properties.GesamtFaelleTag
-                console.log(`Tatsächlich schon vorhanden:  ${currentMeldedatum}`)
             }else{
                 if(currentMeldedatum){
                     cumulativeSeries.push([currentMeldedatum,cumulativeValue])
@@ -194,7 +193,6 @@ export async function fetchRKITimeSeries(features) {
     }
 }
 export async function fetchJHUTimeSeries(features) {
-    console.log('converting JHU data')
     let data = {
         timeSeriesConfirmed: [],
         timeSeriesDeaths: [],

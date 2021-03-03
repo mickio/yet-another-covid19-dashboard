@@ -35,7 +35,6 @@ export default {
             this.dispatchAction(newAction)
         },
         setting() {
-            console.log('updated!')
             this.$nextTick( () => this.$refs.chart.resize() ) 
             setTimeout(() => {
                 this.$refs.chart.resize()
