@@ -313,9 +313,9 @@ export class Option {
 }
 export function selectRegionFromUrl() {
     let pathname = decodeURI( location.pathname )
-    let eligiblePath = pathname.match(/\/(county|country)\/((\w|[äÄüÜß ,])*)\/?$/)
+    let eligiblePath = pathname.match(/\/(county|country)\/((\w|[äÄüÜß ,.])*)\/?$/)
     if (!eligiblePath) {
-      return {type: 'county',name: 'Bundesgebiet'}
+        return {type: 'county',name: 'Bundesgebiet'}
     }
     return {type: eligiblePath[1], name: eligiblePath[2]}
   }

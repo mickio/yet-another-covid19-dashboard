@@ -77,7 +77,7 @@ export default {
         this.loadAndSetRegionData(this.regionType)
     },
     watch: {
-        setting(regionType) {
+        regionType(regionType) {
             this.loadAndSetRegionData(regionType)
         }
     } 

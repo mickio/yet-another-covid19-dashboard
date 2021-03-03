@@ -2,7 +2,7 @@
     <div class="card">
         <div class="input-container">
             <div ref="close-icon" @click="clearInput"></div>
-            <input v-model="term" class="input is-small" type="text" placeholder="z. B. Neuss">
+            <input v-model="term" class="input is-small" type="text" placeholder="type region name to filter data">
         </div>
         <div class="table-container">
             <div class="has-margin has-text-small" ><b class="has-text-small">Kreis </b> | Insgesamt gemeldet | Neu gemeldet | <span class="has-text-light has-text-small" >Neu pro 100.000 EW</span></div>
@@ -74,7 +74,7 @@ export default {
         },
         sortLandkreise(opt,event) {
             let sortCriterium
-            let operator_regions = this.setting.type == 'country'?operator_countries:operator_counties
+            let operator_regions = this.regionType == 'country'?operator_countries:operator_counties
             if(this.activeSortTarget && this.activeSortTarget===event.target) {
                 if(this.activeSortTarget.classList.contains('sorted-asc')) {
                     this.activeSortTarget.classList.remove('sorted-asc') // highlight Sortierrichtung...
