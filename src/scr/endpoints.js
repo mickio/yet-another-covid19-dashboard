@@ -1,5 +1,6 @@
 const ROOT = 'https://corona.zentralcloud.de'
 // const ROOT = 'http://localhost:8000'
+// const ROOT = process.env.VUE_APP_API_ENDPOINT_ROOT
 const BUND = 'Bundesgebiet'
 const RKI_FEATURE_SNAPSHOT = 'RKI_Landkreisdaten'
 const RKI_FEATURE_TIME_SERIES = 'RKI_COVID19'

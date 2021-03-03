@@ -5,7 +5,7 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
-    setting: {type: 'county',name: 'Bundesgebiet',dataType: 'daily-values'},
+    setting: {type: 'county',name: 'Bundesgebiet'},
     resize: false
   },
   mutations: {

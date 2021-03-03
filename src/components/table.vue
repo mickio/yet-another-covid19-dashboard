@@ -67,6 +67,7 @@ export default {
             this.$refs[type].classList.add('is-active')
             types.forEach(t=>this.$refs[t].classList.remove('is-active'))
             this.$store.commit('updateRegion',{type: type, name: type=='country'?'Germany':'Bundesgebiet'})
+            history.pushState({...this.$store.state.setting},`COVID19-Dashboard - Infektionsgeschehen ${type=='country'?'Germany':'Bundesgebiet'}`,`/${this.regionType}/${type=='country'?'Germany':'Bundesgebiet'}`)
         },
         clearInput() {
             this.term=''
@@ -102,13 +103,31 @@ export default {
             }
             this.activeTarget = event.target.parentNode
             this.activeTarget.classList.add('is-selected')
-            this.$store.commit('updateRegion', {type: this.setting.type, name: opt.county??opt.country})
+            this.$store.commit('updateRegion', {name: opt.county??opt.country})
+            history.pushState({...this.$store.state.setting},`COVID19-Dashboard - Infektionsgeschehen ${opt.county??opt.country}`,`/${this.regionType}/${opt.county??opt.country}`)
         },
         mouseover(opt) {
             this.$emit('mouseover',opt.county??opt.country)
         },
         mouseout(opt) {
             this.$emit('mouseout',opt.county??opt.country)
+        },
+        async initializeTable(regionType){
+            if (regionType == 'country') {
+                this.regions = await this.$root.$loader(endpoints.JHU_snapshot_endpoint).get()
+                if (this.activeSortTarget){
+                    this.activeSortTarget.classList.remove('sorted-desc', 'sorted-asc')
+                }
+                this.activeSortTarget = this.$refs['initial-country-target']
+                this.activeSortTarget.classList.add('sorted-desc')
+            } else {
+                this.regions = await this.$root.$loader(endpoints.RKI_snapshot_endpoint).get()
+                if (this.activeSortTarget){
+                    this.activeSortTarget.classList.remove('sorted-desc', 'sorted-asc')
+                }
+                this.activeSortTarget = this.$refs['initial-target']
+                this.activeSortTarget.classList.add('sorted-desc')
+            }
         }
     },
     computed: {
@@ -134,28 +153,17 @@ export default {
                     )
             })
         },
-        setting() {
-            return this.$store.state.setting
+        regionType() {
+            return this.$store.state.setting.type
         },
     },
     watch: {
-        async setting(newSetting) {
-            if (newSetting.type == 'country') {
-                this.regions = await this.$root.$loader(endpoints.JHU_snapshot_endpoint).get()
-                this.activeSortTarget.classList.remove('sorted-desc', 'sorted-asc')
-                this.activeSortTarget = this.$refs['initial-country-target']
-                this.activeSortTarget.classList.add('sorted-desc')
-            } else {
-                this.regions = await this.$root.$loader(endpoints.RKI_snapshot_endpoint).get()
-                this.activeSortTarget = this.$refs['initial-target']
-                this.activeSortTarget.classList.add('sorted-desc')
-            }
+        regionType(regionType) {
+            this.initializeTable(regionType)
         }
     },
     async created() {
-        this.regions = await this.$root.$loader(endpoints.RKI_snapshot_endpoint).get()
-        this.activeSortTarget = this.$refs['initial-target']
-        this.activeSortTarget.classList.add('sorted-desc')
+        this.initializeTable(this.regionType)
     }
 }
 </script>

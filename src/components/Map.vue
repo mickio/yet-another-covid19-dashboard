@@ -31,29 +31,36 @@ export default {
         },
         select(option) {
             this.$store.commit("updateRegion", {name: option.data.county})
-        }
-    },
-    async created() {
-        const features = await this.$root.$loader(this.endpoints.RKI_snapshot_endpoint).get()
-        features.forEach(element => {
-            this.nationalOptions.series.data.push({
-                name: element.RS,
-                value: element.cases7_per_100k,
-                values: element,
-                county: element.county
+            history.pushState({...this.$store.state.setting},`COVID19-Dashboard - Infektionsgeschehen ${option.data.county}`,`/${this.setting.type}/${option.data.county}`)
+        },
+        async loadNationalMapData(){
+            const features = await this.$root.$loader(this.endpoints.RKI_snapshot_endpoint).get()
+            features.forEach(element => {
+                this.nationalOptions.series.data.push({
+                    name: element.RS,
+                    value: element.cases7_per_100k,
+                    values: element,
+                    county: element.county
+                });
             });
-        });
-        this.options = this.nationalOptions
-    },
-    computed: {
-        setting() {
-            return this.$store.state.setting
-        }
-    },
-    watch: {
-        async setting(setting) {
+        },
+        async loadInternationalMapData(){
+            const features = await this.$root.$loader(this.endpoints.JHU_snapshot_endpoint).get()
+            features.forEach(element => {
+                this.internationalOptions.series.data.push({
+                    name: element.country,
+                    value: element.d_confirmed_7/element.confirmed*element.incidence,
+                    values: element,
+                    county: element.country
+                });
+            });
+        },
+        async loadMapDataAndmoveTo(setting){
             let bbox
             if (setting.type == 'county') {
+                if(this.nationalOptions.series.data.length == 0) {
+                    await this.loadNationalMapData()
+                }
                 this.options = this.nationalOptions
                 bbox = setting.name === "Bundesgebiet" ?
                     this.$root.$worldmap.features.find(el => el.properties.name === 'Germany').bbox :
@@ -63,15 +70,7 @@ export default {
                 this.options.series.zoom = setting.name == 'Bundesgebiet' ? 1 : 10
             } else {
                 if(this.internationalOptions.series.data.length == 0) {
-                    const features = await this.$root.$loader(this.endpoints.JHU_snapshot_endpoint).get()
-                    features.forEach(element => {
-                        this.internationalOptions.series.data.push({
-                            name: element.country,
-                            value: element.d_confirmed_7/element.confirmed*element.incidence,
-                            values: element,
-                            county: element.country
-                        });
-                    });
+                    await this.loadInternationalMapData()
                 }
                 this.options = this.internationalOptions
                 bbox = this.$root.$worldmap.features.find(el => el.properties.name === setting.name).bbox
@@ -79,6 +78,19 @@ export default {
                 this.options.series.center = latLng
                 this.options.series.zoom = 5
             }
+        }
+    },
+    async created() {
+        this.loadMapDataAndmoveTo(this.setting)
+    },
+    computed: {
+        setting() {
+            return this.$store.state.setting
+        }
+    },
+    watch: {
+        async setting(setting) {
+            await this.loadMapDataAndmoveTo(setting)
             setTimeout(() => {
                 this.dispatchAction({type: "highlight", name: setting.name})
             },500)

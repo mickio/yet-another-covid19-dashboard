@@ -33,6 +33,9 @@
                     <td class="has-text-right"> {{Intl.NumberFormat().format(current.active)}} </td>
                     <td class="has-text-right has-text-light">{{Intl.NumberFormat().format(Math.round((current.total-current.genesen-current.gestorben)*100000/current.population))}}</td>
                 </tr>
+                <tr/>
+                <tr/>
+                <tr/>
                 <tr>
                     <td>Veränderung / Vorwoche</td>
                     <td></td>
@@ -60,7 +63,6 @@ export default {
         return {
             endpoints,
             current: {},
-            fetchData: this.fetchDataCounty
         }
     },
     computed: {
@@ -76,8 +78,8 @@ export default {
                 this.$root.$loader(this.endpoints.RKI_last_reported_value_endpoint(option,'AnzahlFall','NeuerFall')).get().then(properties => properties[0].diff ),
                 this.$root.$loader(this.endpoints.RKI_last_reported_value_endpoint(option,'AnzahlTodesFall','NeuerTodesfall')).get().then(properties => properties[0].diff ),
                 this.$root.$loader(this.endpoints.RKI_totals_endpoint(option,'AnzahlFall')).get().then(properties => properties[0].Gesamtfaelle),
-                this.$root.$loader(this.endpoints.RKI_totals_endpoint(option,'AnzahlTodesfall')).get().then(properties => properties[0].Gesamtfaelle),
                 this.$root.$loader(this.endpoints.RKI_totals_endpoint(option,'AnzahlGenesen')).get().then(properties => properties[0].Gesamtfaelle),
+                this.$root.$loader(this.endpoints.RKI_totals_endpoint(option,'AnzahlTodesfall')).get().then(properties => properties[0].Gesamtfaelle),
                 option=='Bundesgebiet' ? 83019213 : this.$root.$loader(this.endpoints.RKI_snapshot_endpoint).get().then(properties => properties.find(el=>el.county==option).EWZ)
             ]) 
             timeSeries = await this.$root.$loader(endpoint_confirmed).getComputed( fetchRKITimeSeries )
@@ -111,15 +113,18 @@ export default {
                 t: Math.round(1/ds.rate_active),
                 d: Math.round((ds.r**(7/4)-1)*100) 
             }
+        },
+        async fetchData(state) {
+            let fetchData = state.type == 'county' ? this.fetchDataCounty : this.fetchDataCountry
+            await fetchData(state.name)
         }
     },
-    async created() {
-        await this.fetchData('Bundesgebiet')
+    created() {
+        this.fetchData(this.state)
     },
     watch: {
-        async state(state) {
-            this.fetchData = state.type == 'county' ? this.fetchDataCounty : this.fetchDataCountry
-            await this.fetchData(state.name)
+        state(state) {
+            this.fetchData(state)
         }
     }
 }

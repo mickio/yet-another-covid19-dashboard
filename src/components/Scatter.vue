@@ -31,42 +31,54 @@ export default {
         },
         select(option) {
             this.$store.commit('updateRegion', {name: option.data[3].county})
-        }
-    },
-    async created() {
-        const [current, lastweek] = await Promise.all([
-            this.$root.$loader(this.endpoints.RKI_snapshot_endpoint).get(),
-            this.$root.$loader(this.endpoints.RKI_last_week_snapshot_endpoint).get()
-        ]);
-        current.forEach(el =>{
-            const lw = lastweek.find(elem => elem.IdLandkreis===el.RS);
-            const rate = (el.cases7_lk-lw.confirmed7)/lw.confirmed7*100;
-            lw.f7=el.cases7_lk/lw.confirmed7
-            el.lastweek = lw
-            this.nationalOptions.series.data.push([Math.round(el.cases7_per_100k),Math.round(rate),lw,el])
-        })
-        this.options = this.nationalOptions
-    },
-    computed: {
-        setting() {
-            return this.$store.state.setting
+            history.pushState({...this.$store.state.setting},`COVID19-Dashboard - Infektionsgeschehen ${option.data[3].county}`,`/${this.regionType}/${option.data[3].county}`)
         },
-    },
-    watch: {
-        async setting(setting) {
-            if(setting.type == 'county') {
+        async loadCountyData() {
+            const [current, lastweek] = await Promise.all([
+                this.$root.$loader(this.endpoints.RKI_snapshot_endpoint).get(),
+                this.$root.$loader(this.endpoints.RKI_last_week_snapshot_endpoint).get()
+            ]);
+            current.forEach(el =>{
+                const lw = lastweek.find(elem => elem.IdLandkreis===el.RS);
+                const rate = (el.cases7_lk-lw.confirmed7)/lw.confirmed7*100;
+                lw.f7=el.cases7_lk/lw.confirmed7
+                el.lastweek = lw
+                this.nationalOptions.series.data.push([Math.round(el.cases7_per_100k),Math.round(rate),lw,el])
+            })
+        },
+        async loadCountryData(){
+            const features = await this.$root.$loader(this.endpoints.JHU_snapshot_endpoint).get()
+            features.forEach( properties => {
+                let incidence = Math.round(properties.d_confirmed_7/properties.confirmed * properties.incidence)
+                let delta = Math.round((2**(7*properties.rate_active)-1)*100)
+                this.internationalOptions.series.data.push([incidence,delta,properties,{county: properties.country}])
+            })
+        },
+        async loadAndSetRegionData(regionType) {
+            if(regionType == 'county') {
+                if(this.nationalOptions.series.data.length == 0) {
+                    await this.loadCountyData()
+                }
                 this.options = this.nationalOptions
             } else {
                 if(this.internationalOptions.series.data.length == 0) {
-                    const features = await this.$root.$loader(this.endpoints.JHU_snapshot_endpoint).get()
-                    features.forEach( properties => {
-                        let incidence = Math.round(properties.d_confirmed_7/properties.confirmed * properties.incidence)
-                        let delta = Math.round((2**(7*properties.rate_active)-1)*100)
-                        this.internationalOptions.series.data.push([incidence,delta,properties,{county: properties.country}])
-                    })
+                    await this.loadCountryData()
                 }
                 this.options = this.internationalOptions
             }
+        },
+    },
+    computed: {
+        regionType() {
+            return this.$store.state.setting.type
+        },
+    },
+    async created() {
+        this.loadAndSetRegionData(this.regionType)
+    },
+    watch: {
+        setting(regionType) {
+            this.loadAndSetRegionData(regionType)
         }
     } 
 }

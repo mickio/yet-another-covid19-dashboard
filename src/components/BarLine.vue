@@ -93,24 +93,25 @@ export default {
             this.options.series[1].data = data.timeSeriesDeathsCumulative
             this.options.series[2].data = data.timeSeriesActiveCumulative
         },
+        async getTimeSeriesData(state){
+            if (state.type == 'county') { 
+                this.timeSeries = this.setTimeSeriesDataCounty
+                this.options = this.dailyValuesOptionsCounty
+            }else if (state.type == 'country') { 
+                this.timeSeries = this.setTimeSeriesDataCountry
+                this.options = this.dailyValuesOptionsCountry
+            }
+            await this.timeSeries(state.name)
+        }
     },
     watch: {
         async state(newState) {
             this.setTab('daily-values')
-            if (newState.type == 'county') { 
-                this.timeSeries = this.setTimeSeriesDataCounty
-                this.options = this.dailyValuesOptionsCounty
-            }else if (newState.type == 'country') { 
-                this.timeSeries = this.setTimeSeriesDataCountry
-                this.options = this.dailyValuesOptionsCountry
-            }
-            await this.timeSeries(newState.name)
+            await this.getTimeSeriesData(newState)
         },
     },
     async created() {
-        this.timeSeries = this.setTimeSeriesDataCounty
-        this.options = this.dailyValuesOptionsCounty
-        await this.timeSeries('Bundesgebiet')
+        await this.getTimeSeriesData(this.state)
     },
     // mounted() {
     //     console.log(this.$refs.chart.$children[0].$el) //@TODO

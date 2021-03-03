@@ -71,11 +71,6 @@ export default {
       this.downplayDot(option)
     },
   },
-  data() {
-    return {
-      currentIndex: null
-    }
-  },
 }
 </script>
 
