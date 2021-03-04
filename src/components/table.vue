@@ -9,10 +9,10 @@
             <table>
                 <thead>
                     <tr class="sort-row">
-                        <td> <span class="sort" @click="sortLandkreise('a',$event)"></span></td>
-                        <td> <span class="sort" @click="sortLandkreise('b',$event)"></span></td>
-                        <td> <span ref="initial-country-target" class="sort" @click="sortLandkreise('c',$event)"></span></td>
-                        <td> <span ref="initial-target" class="sort" @click="sortLandkreise('d',$event)"></span></td>
+                        <td> <span class="sort" @click="sortRegionsData($event)"></span></td>
+                        <td> <span class="sort" @click="sortRegionsData($event)"></span></td>
+                        <td> <span ref="initial-country-target" class="sort" @click="sortRegionsData($event)"></span></td>
+                        <td> <span ref="initial-target" class="sort" @click="sortRegionsData($event)"></span></td>
                     </tr>
                 </thead>
                 <tbody>
@@ -28,8 +28,8 @@
         </div>
             <nav>
                 <ul>
-                    <li ref="county" class="is-active" ><a @click="setTab('county')">National</a></li>
-                    <li ref="country" ><a @click="setTab('country')">International</a></li>
+                    <li ref="county"><a @click="setRegionType('county')">National</a></li>
+                    <li ref="country" ><a @click="setRegionType('country')">International</a></li>
                 </ul>
             </nav>
     </div>
@@ -37,18 +37,18 @@
 <script>
 import endpoints from "../scr/endpoints.js"
 
-const operator_counties = {
-    a: (a,b) => (a.GEN > b.GEN)?1:(a.GEN < b.GEN)?-1:0,
-    b: (a,b) => a.cases - b.cases,
-    c: (a,b) => a.cases7_lk - b.cases7_lk,
-    d: (a,b) => a.cases7_per_100k - b.cases7_per_100k
-}
-const operator_countries = {
-    a: (a,b) => (a.country > b.country)?1:(a.country < b.county)?-1:0,
-    b: (a,b) => a.confirmed - b.confirmed,
-    c: (a,b) => a.d_confirmed_7 - b.d_confirmed_7,
-    d: (a,b) => a.d_confirmed_7 * a.incidence / a.confirmed - b.d_confirmed_7 * b.incidence / b.confirmed
-}
+const operator_counties = [
+    (a,b) => (a.GEN > b.GEN)?1:(a.GEN < b.GEN)?-1:0,
+    (a,b) => a.cases - b.cases,
+    (a,b) => a.cases7_lk - b.cases7_lk,
+    (a,b) => a.cases7_per_100k - b.cases7_per_100k
+]
+const operator_countries = [
+    (a,b) => (a.country > b.country)?1:(a.country < b.county)?-1:0,
+    (a,b) => a.confirmed - b.confirmed,
+    (a,b) => a.d_confirmed_7 - b.d_confirmed_7,
+    (a,b) => a.d_confirmed_7 * a.incidence / a.confirmed - b.d_confirmed_7 * b.incidence / b.confirmed
+]
 
 
 export default {
@@ -58,44 +58,28 @@ export default {
             regions: [],
             activeTarget: null,
             activeSortTarget: null,
-            term: ''
+            activeSortCriterium: null,
+            term: '', 
         };
     },
     methods: {
-        setTab(type) {
-            let types = ['county','country'].filter(t=>t!==type) 
-            this.$refs[type].classList.add('is-active')
-            types.forEach(t=>this.$refs[t].classList.remove('is-active'))
-            this.$store.commit('updateRegion',{type: type, name: type=='country'?'Germany':'Bundesgebiet'})
-            history.pushState({...this.$store.state.setting},`COVID19-Dashboard - Infektionsgeschehen ${type=='country'?'Germany':'Bundesgebiet'}`,`/${this.regionType}/${type=='country'?'Germany':'Bundesgebiet'}`)
+        mouseover(opt) {
+            this.$emit('mouseover',opt.county??opt.country)
+        },
+        mouseout(opt) {
+            this.$emit('mouseout',opt.county??opt.country)
         },
         clearInput() {
             this.term=''
         },
-        sortLandkreise(opt,event) {
-            let sortCriterium
-            let operator_regions = this.regionType == 'country'?operator_countries:operator_counties
-            if(this.activeSortTarget && this.activeSortTarget===event.target) {
-                if(this.activeSortTarget.classList.contains('sorted-asc')) {
-                    this.activeSortTarget.classList.remove('sorted-asc') // highlight Sortierrichtung...
-                    this.activeSortTarget.classList.add('sorted-desc')
-                    sortCriterium = (a,b) => - operator_regions[opt](a,b) // ... und Sortierktiterium setzen
-                }else{
-                    this.activeSortTarget.classList.remove('sorted-desc')
-                    this.activeSortTarget.classList.add('sorted-asc')
-                    sortCriterium = (a,b) => operator_regions[opt](a,b)
-                }
-            }else if(this.activeSortTarget ) {
-                    this.activeSortTarget.classList.remove('sorted-asc','sorted-desc')
-                    this.activeSortTarget = event.target
-                    this.activeSortTarget.classList.add('sorted-asc')
-                    sortCriterium = (a,b) => operator_regions[opt](a,b)
-            }else{
-                    this.activeSortTarget = event.target
-                    this.activeSortTarget.classList.add('sorted-asc')
-                    sortCriterium = (a,b) => operator_regions[opt](a,b)
-            }
-            this.regions = this.regions.sort((a,b) => sortCriterium(a,b))
+        setRegionType(type) {
+            this.$store.commit('updateRegion',{type: type, name: type=='country'?'Germany':'Bundesgebiet'})
+            history.pushState({...this.$store.state.setting},`COVID19-Dashboard - Infektionsgeschehen ${type=='country'?'Germany':'Bundesgebiet'}`,`/${this.regionType}/${type=='country'?'Germany':'Bundesgebiet'}`)
+        },
+        setTab(type) {
+            let types = ['county','country'].filter(t=>t!==type) 
+            this.$refs[type].classList.add('is-active')
+            types.forEach(t=>this.$refs[t].classList.remove('is-active'))
         },
         setSelected(opt,event) {
             if(this.activeTarget) {
@@ -106,29 +90,45 @@ export default {
             this.$store.commit('updateRegion', {name: opt.county??opt.country})
             history.pushState({...this.$store.state.setting},`COVID19-Dashboard - Infektionsgeschehen ${opt.county??opt.country}`,`/${this.regionType}/${opt.county??opt.country}`)
         },
-        mouseover(opt) {
-            this.$emit('mouseover',opt.county??opt.country)
+        toggleSortDirection() {
+            if(this.activeSortTarget.classList.contains('sorted-asc')) {
+                this.activeSortTarget.classList.remove('sorted-asc') // highlight Sortierrichtung...
+                this.activeSortTarget.classList.add('sorted-desc')
+                this.activeSortCriterium = (a,b) => - this.operator_regions[this.activeSortTarget.parentNode.cellIndex](a,b)
+            }else{
+                this.activeSortTarget.classList.remove('sorted-desc')
+                this.activeSortTarget.classList.add('sorted-asc')
+                this.activeSortCriterium = this.operator_regions[this.activeSortTarget.parentNode.cellIndex]
+            }
         },
-        mouseout(opt) {
-            this.$emit('mouseout',opt.county??opt.country)
+        changeSortTarget( target ) {
+            this.activeSortTarget.classList.remove('sorted-asc','sorted-desc')
+            this.activeSortTarget = target
+            this.activeSortTarget.classList.add('sorted-asc')
+            this.activeSortCriterium = this.operator_regions[this.activeSortTarget.parentNode.cellIndex]
+        },
+        sortRegionsData(event) {
+            if(this.activeSortTarget===event.target) {
+                this.toggleSortDirection()
+            }else {
+                this.changeSortTarget(event.target)
+            }
+            this.regions = this.regions.sort((a,b) => this.activeSortCriterium(a,b))
         },
         async initializeTable(regionType){
-            if (regionType == 'country') {
-                this.regions = await this.$root.$loader(endpoints.JHU_snapshot_endpoint).get()
-                if (this.activeSortTarget){
-                    this.activeSortTarget.classList.remove('sorted-desc', 'sorted-asc')
-                }
-                this.activeSortTarget = this.$refs['initial-country-target']
-                this.activeSortTarget.classList.add('sorted-desc')
-            } else {
-                this.regions = await this.$root.$loader(endpoints.RKI_snapshot_endpoint).get()
-                if (this.activeSortTarget){
-                    this.activeSortTarget.classList.remove('sorted-desc', 'sorted-asc')
-                }
-                this.activeSortTarget = this.$refs['initial-target']
-                this.activeSortTarget.classList.add('sorted-desc')
+            if (this.activeSortTarget){
+                this.activeSortTarget.classList.remove('sorted-desc', 'sorted-asc')
             }
-        }
+            if (regionType == 'county') {
+               this.regions = await this.$root.$loader(endpoints.RKI_snapshot_endpoint).get()
+               this.activeSortTarget = this.$refs['initial-target']
+            } else {
+               this.regions = await this.$root.$loader(endpoints.JHU_snapshot_endpoint).get() 
+               this.activeSortTarget = this.$refs['initial-country-target']
+            }
+            this.activeSortTarget.classList.add('sorted-desc')
+            this.activeSortCriterium = this.operator_regions[this.activeSortTarget.parentNode.cellIndex]
+        },
     },
     computed: {
         filteredData() {
@@ -156,14 +156,21 @@ export default {
         regionType() {
             return this.$store.state.setting.type
         },
+        operator_regions() {
+            return this.regionType == 'country'?operator_countries:operator_counties
+        }
     },
     watch: {
         regionType(regionType) {
             this.initializeTable(regionType)
+            this.setTab(regionType)
         }
     },
-    async created() {
+    created() {
         this.initializeTable(this.regionType)
+    },
+    mounted() {
+        this.setTab(this.regionType)        
     }
 }
 </script>
