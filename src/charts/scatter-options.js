@@ -1,6 +1,6 @@
 import {Option} from '../scr/helpers.js'
 
-let options = {
+let optionsTemplate = {
     grid: {
         left: 50,
         top: 10,
@@ -50,18 +50,15 @@ let options = {
     ],
 }
 
-let natOptions = new Option(options)
-let nationalOptions = natOptions
-    .mergeSeriesOption({type: 'scatter', name: 'Dynamik'})
-    .setSeriesLabel(200,{color: 'black',formatter: ({data}) => data[2].Landkreis})
-    .setSeriesItemStyle([200,100,50], {normal: {shadowBlur: 10,shadowColor: 'rgba(0, 19, 51, 0.5)',shadowOffsetY: 5, color: 'rgb(0, 56, 153)'}})
-    .getOptions()
+let optionObjects = {}
 
-let inatOptions = new Option(options)
-let internationalOptions = inatOptions
-    .mergeSeriesOption({type: 'scatter', name: 'Dynamik'})
-    .setSeriesLabel(200,{color: 'black',formatter: ({data}) => data[2].country})
-    .setSeriesItemStyle([200,100,50], {normal: {shadowBlur: 10,shadowColor: 'rgba(0, 19, 51, 0.5)',shadowOffsetY: 5, color: 'rgb(0, 56, 153)'}})
-    .getOptions()
-
-export {nationalOptions, internationalOptions}
+export function getOptions (regionType, deviceClass) {
+    if (!optionObjects[regionType]) {
+        optionObjects[regionType] = new Option(optionsTemplate)
+        .mergeSeriesOption({type: 'scatter', name: 'Dynamik', symbolSize: deviceClass == 'touch' ? 25 : 10 })
+        .setSeriesLabel(200,{color: 'black',formatter: ({data}) => regionType == 'county' ? data[2].Landkreis : data[2].country })
+        .setSeriesItemStyle([200,100,50], {normal: {shadowBlur: 10,shadowColor: 'rgba(0, 19, 51, 0.5)',shadowOffsetY: 5, color: 'rgb(0, 56, 153)'}})
+    }
+    optionObjects[regionType].mergeSeriesOption({symbolSize: deviceClass == 'touch' ? 25 : 10 })
+    return optionObjects[regionType].getOptions()
+}
