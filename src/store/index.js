@@ -15,7 +15,6 @@ export default new Vuex.Store({
     },
     updateDeviceClass (state, deviceClass) {
       state.deviceClass = deviceClass
-      console.log(`Changed class to ${state.deviceClass} `)
     }
   },
   actions: {

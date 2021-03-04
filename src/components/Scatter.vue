@@ -81,7 +81,6 @@ export default {
         },
         deviceClass(deviceClass) {
             this.options = getOptions(this.regionType,deviceClass)
-            console.log(`Device class set to ${deviceClass}`)
         }
     } 
 }
