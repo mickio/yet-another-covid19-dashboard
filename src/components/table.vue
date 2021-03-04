@@ -295,5 +295,14 @@ span.symbol {
   top: 0.1em;
   line-height: 0px;
 }
+@media only screen and (max-width: 800px) {
+    table {
+        width: 100%;
+        font-size: var(--header-text);
+    }
+    .has-text-small{
+        font-size: var(--normal-text);
+    }
+}
 
 </style>>

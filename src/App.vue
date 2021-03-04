@@ -87,6 +87,9 @@ nav li.is-active {
     border: none;
     box-shadow: none;
   }
+  .has-text-large-mobile {
+    font-size: var(--header-text);
+  }
 }
 
 </style>

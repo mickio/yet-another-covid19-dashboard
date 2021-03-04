@@ -141,4 +141,18 @@ export default {
 .has-text-light {
     color: var(--light-color)
 }
+@media only screen and (max-width: 800px) {
+    .table {
+        width: 100%;
+        font-size: var(--header-text);
+    }
+    table, th, td {
+        border-spacing: 2em 0.5em;
+    }
+    .card {
+        width: 80vw;
+        height: max-content;
+        margin: 20px auto;
+    }
+}
 </style>
