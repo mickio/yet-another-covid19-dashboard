@@ -41,7 +41,7 @@ export default {
                 const rate = (el.cases7_lk-lw.confirmed7)/lw.confirmed7*100;
                 lw.f7=el.cases7_lk/lw.confirmed7
                 el.lastweek = lw
-                getOptions(this.regionType,this.deviceClass).series.data.push([Math.round(el.cases7_per_100k),Math.round(rate),lw,el])
+                this.options.series.data.push([Math.round(el.cases7_per_100k),Math.round(rate),lw,el])
             })
         },
         async loadCountryData(){
@@ -49,14 +49,14 @@ export default {
             features.forEach( properties => {
                 let incidence = Math.round(properties.d_confirmed_7/properties.confirmed * properties.incidence)
                 let delta = Math.round((2**(7*properties.rate_active)-1)*100)
-                getOptions(this.regionType,this.deviceClass).series.data.push([incidence,delta,properties,{county: properties.country}])
+                this.options.series.data.push([incidence,delta,properties,{county: properties.country}])
             })
         },
-        async loadRegionData(regionType) {
+        loadRegionData(regionType) {
             if(regionType == 'county') {
-                await this.loadCountyData()
+                this.loadCountyData()
             } else {
-                await this.loadCountryData()
+                this.loadCountryData()
             }
         },
     },
@@ -68,16 +68,16 @@ export default {
             return this.$store.state.deviceClass
         },
     },
-    async created() {
-        await this.loadRegionData(this.regionType)
-        this.options = getOptions(this.regionType,this.deviceClass)
+    created() {
+        this.options = getOptions(this.regionType,this.deviceClass) 
+        this.loadRegionData(this.regionType)
     },
     watch: {
-        async regionType(regionType) {
+        regionType(regionType) {
+            this.options = getOptions(regionType,this.deviceClass) 
             if (this.options.series.data.length == 0) {
-                await this.loadRegionData(regionType)
+                this.loadRegionData(regionType)
             }
-            this.options = getOptions(regionType,this.deviceClass)
         },
         deviceClass(deviceClass) {
             this.options = getOptions(this.regionType,deviceClass)

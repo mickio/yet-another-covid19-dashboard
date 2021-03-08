@@ -39,7 +39,10 @@ export class GeoJSONPropertiesLoader {
                 this.isLoading = false
                 this.isSet = true
             })
-            .catch(e => console.error(`Beim Abruf der Seite ${this.url} ist ein Fehler aufgetreten: ${e}`))
+            .catch(e => {
+                this.reset()
+                console.error(`Beim Abruf der Seite ${this.url} ist ein Fehler aufgetreten: ${e}`)
+            })
     }
     async get() {
         if(this.isSet) {
@@ -54,6 +57,11 @@ export class GeoJSONPropertiesLoader {
                 reject(error => console.error(error))
             }
         })
+    }
+    reset() {
+        this.isLoading = false
+        this.isSet = false
+        this.properties =[]
     }
     async setComputed(fun) {
         await this.get()
@@ -79,48 +87,51 @@ export class MovingAverage {
         Für den laufenden 7-Tage-Mittelwert
     */
     constructor(date, number) {
-        this.q = number ? [number] :[]
-        this.q2 = number && date ? [[date, number]] : []
+        this.q = number && date ? [[date, number]] : []
         this.movingAverage = number ? number : 0
+        this.cumulativeValue = this.movingAverage
+        this.date_mean = date ? date : 0
+        this.date_stderr = this.date_mean**2
+        this.logY_mean = 0
+        this.logY_stderr = 0
+        this.date_logY = 0
     }
     next(date,number, len = 7){
         /* 
-            Liefert anfangs die erreichbaren Mittelwerte. Gibt
-            undefined zurück, wenn die queue mehr als 7
-            Werte enthält, was aber nicht passieren kann.
+            Liefert anfangs die erreichbaren Mittelwerte und schneidet 
+            nach Erreichen die jeweils ersten Werte ab. Es gibt Zähler für 
+            den kumulativen Wert, für den laufenden Mittelwert und für die zur Berechnung
+            der expontiellen Regression des laufenden Mittelwerts erforderlichen Summen.
         */
-        if (this.q.length < len) {
-            this.q.push(number)
-            this.q2.push([date,number])
-            this.movingAverage += number
-            return this.movingAverage/this.q.length
-        } else if (this.q.length == len) {
-            let first = this.q.shift()
-            this.q2.shift()
-            this.q.push(number)
-            this.q2.push([date,number])
-            this.movingAverage += number
-            this.movingAverage -= first
-            return this.movingAverage/len
-        } else {
-            return undefined
+       if ( this.q.length == len) {
+
+           let first = this.q.shift()
+           this.movingAverage -= first[1]
+           this.date_mean -= first[0]
+           this.date_stderr -= first[0]**2
+           this.logY_mean -= Math.log2(first[2]!=0?first[2]:1)
+           this.logY_stderr -= Math.log2(first[2]!=0?first[2]:1)**2
+           this.date_logY -= first[0] * Math.log2(first[2]!=0?first[2]:1)
         }
+        this.movingAverage += number
+        let n = this.movingAverage/(1 + this.q.length)
+        this.q.push([date,number,n])
+        this.cumulativeValue += number
+        this.date_mean += date
+        this.date_stderr += date**2
+        this.logY_mean += Math.log2(n!=0?n:1)
+        this.logY_stderr += Math.log2(n!=0?n:1)**2
+        this.date_logY += date * Math.log2(n!=0?n:1)
+     return n
     }
     getExponentialRegression() {
-        let res = this.q2.reduce((t,step) => {
-            return{
-            date_mean: t.date_mean + step[0],
-            date_stderr: t.date_stderr + step[0]**2,
-            logY_mean: t.logY_mean + Math.log2(step[1]),
-            logY_stderr: t.logY_stderr + Math.log2(step[1])**2,
-            date_logY: t.date_logY + step[0]*Math.log2(step[1])
-        }},{date_mean:0,date_stderr:0,logY_mean:0,logY_stderr:0, date_logY: 0})
-        let rate = (res.date_logY-res.date_mean*res.logY_mean/7)/(res.date_stderr - res.date_mean**2/7)
-        let intersection = (res.logY_mean - rate * res.date_mean)/this.q2.length
+        let rate = (this.date_logY-this.date_mean*this.logY_mean/this.q.length)/(this.date_stderr - this.date_mean**2/this.q.length)
+        let intersection = (this.logY_mean - rate * this.date_mean)/this.q.length
+        // console.log(`Länge q: ${this.q.length} Rate: ${rate*86400000}, intersection: ${intersection}, Bestimmtheit: ${Math.sqrt(Math.abs(1 - this.q.reduce((t,s) => t+(intersection + rate * s[0] - Math.log2(s[2]))**2,0)/this.logY_stderr))}, stderrlogY: ${this.logY_stderr} `)
         return {
-            rate: rate * 86400000,
+            rate: rate * 86400000, // Wir wollen die Rate in Tagen
             intersection: intersection,
-            q_lin: Math.sqrt(Math.abs(1 - this.q2.reduce((t,s) => t+(intersection + rate * s[0] - Math.log2(s[1]))**2,0)/res.logY_stderr)),
+            q_lin: Math.sqrt(Math.abs(1 - this.q.reduce((t,s) => t+(intersection + rate * s[0] - Math.log2(s[2]))**2,0)/this.logY_stderr)),
             r: 2**(rate*4*86400000)
         }
 
@@ -142,9 +153,7 @@ export async function fetchRKITimeSeries(features) {
     let expRegressionSeries = []
     let currentMeldedatum = null
     let movingAverage = new MovingAverage()
-    let smoothMovingAverage = new MovingAverage()
     let increment = 0
-    let av
     features.forEach( properties => {
         if(properties.NeuerFall==0 || properties.NeuerTodesfall == 0 || properties.neuGenesen == 0) {
             timeSeries[0].push([properties.Meldedatum,properties.GesamtFaelleTag])
@@ -153,10 +162,8 @@ export async function fetchRKITimeSeries(features) {
             }else{
                 if(currentMeldedatum){
                     cumulativeSeries.push([currentMeldedatum,cumulativeValue])
-                    av = movingAverage.next(currentMeldedatum,increment)
-                    smoothMovingAverage.next(currentMeldedatum,av)
-                    movingAverageSeries.push([currentMeldedatum,av])
-                    expRegressionSeries.push([currentMeldedatum,smoothMovingAverage.getExponentialRegression().r])
+                    movingAverageSeries.push([currentMeldedatum,movingAverage.next(currentMeldedatum,increment)])
+                    expRegressionSeries.push([currentMeldedatum,movingAverage.getExponentialRegression().r])
                 }else{
                     currentMeldedatum = properties.Meldedatum
                 }
@@ -170,10 +177,8 @@ export async function fetchRKITimeSeries(features) {
                 increment += properties.GesamtFaelleTag
             }else{
                 cumulativeSeries.push([currentMeldedatum,cumulativeValue])
-                av = movingAverage.next(currentMeldedatum,increment)
-                smoothMovingAverage.next(currentMeldedatum,av)
-                movingAverageSeries.push([currentMeldedatum,av])
-                expRegressionSeries.push([currentMeldedatum,smoothMovingAverage.getExponentialRegression().r])
+                movingAverageSeries.push([currentMeldedatum,movingAverage.next(currentMeldedatum,increment)])
+                expRegressionSeries.push([currentMeldedatum,movingAverage.getExponentialRegression().r])
                 cumulativeValue += properties.GesamtFaelleTag
                 increment = properties.GesamtFaelleTag
                 currentMeldedatum = properties.Meldedatum
@@ -181,10 +186,8 @@ export async function fetchRKITimeSeries(features) {
         }
     })
     cumulativeSeries.push([currentMeldedatum,cumulativeValue])
-    av = movingAverage.next(currentMeldedatum,increment)
-    smoothMovingAverage.next(currentMeldedatum,av)
-    movingAverageSeries.push([currentMeldedatum,av])
-    expRegressionSeries.push([currentMeldedatum,smoothMovingAverage.getExponentialRegression().r])
+    movingAverageSeries.push([currentMeldedatum,movingAverage.next(currentMeldedatum,increment)])
+    expRegressionSeries.push([currentMeldedatum,movingAverage.getExponentialRegression().r])
     return {
       timeSeries: timeSeries,
       cumulativeSeries: cumulativeSeries,
@@ -313,7 +316,7 @@ export class Option {
 }
 export function selectRegionFromUrl() {
     let pathname = decodeURI( location.pathname )
-    let eligiblePath = pathname.match(/\/(county|country)\/((\w|[äÄüÜß ,.])*)\/?$/)
+    let eligiblePath = pathname.match(/\/(county|country)\/((\w|[äÄüÜß ,.-])*)\/?$/)
     if (!eligiblePath) {
         return {type: 'county',name: 'Bundesgebiet'}
     }

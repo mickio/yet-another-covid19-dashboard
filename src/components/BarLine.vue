@@ -39,6 +39,9 @@ export default {
         state() {
             return this.$store.state.setting
         },
+        deviceClass() {
+            return this.$store.state.deviceClass
+        },
     },
     methods: {
         async setTab(type) {
@@ -105,13 +108,17 @@ export default {
         }
     },
     watch: {
-        async state(newState) {
+        state(newState) {
             this.setTab('daily-values')
-            await this.getTimeSeriesData(newState)
+            this.getTimeSeriesData(newState)
         },
+        deviceClass(deviceClass) {
+            this.options.dataZoom[0].type = deviceClass == 'touch' ? 'slider' : 'inside'
+        }
     },
     async created() {
         await this.getTimeSeriesData(this.state)
+        this.options.dataZoom[0].type = this.deviceClass == 'touch' ? 'slider' : 'inside'
     },
     // mounted() {
     //     console.log(this.$refs.chart.$children[0].$el) //@TODO

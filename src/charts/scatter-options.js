@@ -60,5 +60,7 @@ export function getOptions (regionType, deviceClass) {
         .setSeriesItemStyle([200,100,50], {normal: {shadowBlur: 10,shadowColor: 'rgba(0, 19, 51, 0.5)',shadowOffsetY: 5, color: 'rgb(0, 56, 153)'}})
     }
     optionObjects[regionType].mergeSeriesOption({symbolSize: deviceClass == 'touch' ? 25 : 10 })
+    optionsTemplate.dataZoom[0].type = deviceClass == 'touch' ? 'slider' : 'inside' 
+    optionsTemplate.dataZoom[1].type = deviceClass == 'touch' ? 'slider' : 'inside' 
     return optionObjects[regionType].getOptions()
 }

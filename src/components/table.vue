@@ -123,7 +123,7 @@ export default {
                this.regions = await this.$root.$loader(endpoints.RKI_snapshot_endpoint).get()
                this.activeSortTarget = this.$refs['initial-target']
             } else {
-               this.regions = await this.$root.$loader(endpoints.JHU_snapshot_endpoint).get() 
+                this.regions = await this.$root.$loader(endpoints.JHU_snapshot_endpoint).get() 
                this.activeSortTarget = this.$refs['initial-country-target']
             }
             this.activeSortTarget.classList.add('sorted-desc')
