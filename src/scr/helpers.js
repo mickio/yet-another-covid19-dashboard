@@ -137,7 +137,7 @@ export class MovingAverage {
 
     }
 }
-export async function fetchRKITimeSeries(features) {
+export function fetchRKITimeSeries(features) {
     /* 
         Lädt je Tag und neu - nichtneu -akkumulierte Meldungen (AnzahlFall, AnzahlTodesfall, AnzahlGenesen).
         Weil die Zählung bei der Akkumulierung gemäß der Qualifikatoren NeuerFall, NeuerTodesfall usw. läuft,
@@ -195,7 +195,7 @@ export async function fetchRKITimeSeries(features) {
       expRegressionSeries: expRegressionSeries
     }
 }
-export async function fetchJHUTimeSeries(features) {
+export function fetchJHUTimeSeries(features) {
     let data = {
         timeSeriesConfirmed: [],
         timeSeriesDeaths: [],
@@ -216,7 +216,7 @@ export async function fetchJHUTimeSeries(features) {
     })
     return data
 }
-export async function mapToJHUFormat(features) {
+export function mapToJHUFormat(features) {
     return features.map(properties => { return {
         confirmed: properties.cases,
         deaths: properties.deaths,

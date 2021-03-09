@@ -46,9 +46,16 @@ let options = {
     extraCssText: "text-align:left",
     formatter: tooltipContent
   },
-  dataZoom: [{
-      type: 'inside'
-  }],
+  dataZoom: [
+    {
+      type: 'inside',
+      realtime: true
+    },
+    {
+      show: false,
+      realtime: true
+    },
+  ],
   // legend: {
   //   orient: 'vertical',
   //   left: 50,

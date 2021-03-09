@@ -113,12 +113,12 @@ export default {
             this.getTimeSeriesData(newState)
         },
         deviceClass(deviceClass) {
-            this.options.dataZoom[0].type = deviceClass == 'touch' ? 'slider' : 'inside'
+            this.options.dataZoom[1].show = deviceClass == 'touch'
         }
     },
     async created() {
         await this.getTimeSeriesData(this.state)
-        this.options.dataZoom[0].type = this.deviceClass == 'touch' ? 'slider' : 'inside'
+        this.options.dataZoom[1].show = this.deviceClass == 'touch'
     },
     // mounted() {
     //     console.log(this.$refs.chart.$children[0].$el) //@TODO
