@@ -103,6 +103,7 @@ export class MovingAverage {
             den kumulativen Wert, für den laufenden Mittelwert und für die zur Berechnung
             der expontiellen Regression des laufenden Mittelwerts erforderlichen Summen.
         */
+       number = !isNaN(number)? number : 0
        if ( this.q.length == len) {
 
            let first = this.q.shift()
@@ -196,6 +197,8 @@ export function fetchRKITimeSeries(features) {
     }
 }
 export function fetchJHUTimeSeries(features) {
+    let ma = new MovingAverage()
+    let r,regr
     let data = {
         timeSeriesConfirmed: [],
         timeSeriesDeaths: [],
@@ -206,12 +209,15 @@ export function fetchJHUTimeSeries(features) {
         timeSeriesConfirmedMovingAverage: []
     }
     features.forEach( properties => {
+        ma.next(properties.date,properties.d_confirmed)
+        regr = ma.getExponentialRegression() 
+        r = 2**(regr.rate*4)
         data.timeSeriesConfirmed.push([properties.date,properties.d_confirmed])
         data.timeSeriesDeaths.push([properties.date,properties.d_deaths])
         data.timeSeriesActiveCumulative.push([properties.date,properties.active])
         data.timeSeriesConfirmedCumulative.push([properties.date,properties.confirmed])
         data.timeSeriesDeathsCumulative.push([properties.date,properties.deaths])
-        data.timeSeriesR.push([properties.date,properties.r])
+        data.timeSeriesR.push([properties.date,r])
         data.timeSeriesConfirmedMovingAverage.push([properties.date,properties.d_confirmed_7/7])
     })
     return data

@@ -1,5 +1,5 @@
-// const ROOT = 'https://corona.zentralcloud.de'
-const ROOT = ''
+const ROOT = 'https://corona.zentralcloud.de'
+// const ROOT = ''
 // const ROOT = 'http://localhost:8000'
 // const ROOT = process.env.VUE_APP_API_ENDPOINT_ROOT
 const BUND = 'Bundesgebiet'
