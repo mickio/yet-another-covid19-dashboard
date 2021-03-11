@@ -127,9 +127,9 @@ export default {
                 incidence: Math.round(ds.d_confirmed_7 * ds.incidence / ds.confirmed) 
             }
         },
-        async fetchData(state) {
+        fetchData(state) {
             let fetchData = state.type == 'county' ? this.fetchDataCounty : this.fetchDataCountry
-            await fetchData(state.name)
+            fetchData(state.name)
         }
     },
     created() {
